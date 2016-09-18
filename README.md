@@ -23,7 +23,7 @@ Input is a JSON text file in the following form.  (suffix is optional)
 
 Example Command line:
 ```bash
-python myS3Loader.py loadthese.json  > output.json
+python s3fupload.py loadthese.json  > output.json
 ```
 
 Example output:
