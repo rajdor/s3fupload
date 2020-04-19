@@ -1,149 +1,100 @@
 # s3fupload
 
 s3fupload is for copying files from a local system to S3.
-Currently a hobby work in progress.  It's aim is to provide robust acknowledgement of s3 copy confirmation and timing.
+It's aim is to provide robust acknowledgement of s3 copy confirmation and timing.
 
-Input is a JSON text file in the following form.  (suffix is optional)
+Input is a JSON text file in the following form.  
+Currently, suffix is optional and only one option is available %%timestamp%%
+
+Example Command line:
+```bash
+python3 s3fupload.py ./example/single.json > ./example/single_example_outout.json
+```
+
+```bash
+python3 s3fupload.py ./example/consignment.json > ./example/consignment_example_output.json
+```
+
+
+## Example single file
+
 ```json
 [
  {
-   "bucket": "mydatalake",
-   "remotePath": "landing/landsat/",
+   "bucket": "jarrods-datalake",
+   "remotePath": "landing/",
    "remoteFileSuffix": "%%timestamp%%",
-   "localFile": "c:\\temp\\1\\hello.txt"
- },
- {
-   "bucket": "mydatalake",
-   "remotePath": "landing/landsat/",
-   "remoteFileSuffix": "%%timestamp%%",
-   "localFile": "c:\\temp\\1\\world.txt"
+   "localFile": "./example/CLAIM_STATUS.csv"
  }
 ]
 ```
 
-Example Command line:
-```bash
-python s3fupload.py loadthese.json  > output.json
-```
 
 Example output:
 ```json
 {
+    "batch": "1587280908.1078215",
+    "start_epoch": 1587280908.1078215,
+    "start": "2020/04/19-17:21:48",
     "files": [
         {
-            "elapse": 4.042999982833862, 
-            "end": "2016/09/18-13:08:33", 
-            "name": "c:\\temp\\1\\hello.txt", 
-            "remoteFile": {
-                "s3md5": "b10a8db164e0754105b7a99be72e3fe5", 
-                "bucket": "mydatalake", 
-                "upload": {
-                    "elapse": 1.3220000267028809, 
-                    "end": "2016/09/18-13:08:32", 
-                    "consistency_check_wait": 0, 
-                    "start_epoch": 1474168110.839, 
-                    "start": "2016/09/18-13:08:30", 
-                    "end_epoch": 1474168112.161, 
-                    "msg": "Passed all tests", 
-                    "consistency_check_retries": 0
-                }, 
-                "filename": "landing/landsat/hello.txt__20160918_130829", 
-                "extra_args": {
-                    "Metadata": {
-                        "local_file": "c:\\temp\\1\\hello.txt", 
-                        "upload_batch": "1474168109.14"
-                    }, 
-                    "ServerSideEncryption": "AES256"
-                }, 
-                "last_modified": "2016/09/18-13:08:34", 
-                "before": {
-                    "last_modified_epoch": null, 
-                    "size": null, 
-                    "last_modified": null, 
-                    "exists": false, 
-                    "s3md5": null
-                }, 
-                "size": 11, 
-                "last_modified_epoch": 1474168114.0
-            }, 
-            "start_epoch": 1474168109.145, 
-            "start": "2016/09/18-13:08:29", 
-            "end_epoch": 1474168113.188, 
+            "start_epoch": 1587280908.107864,
+            "start": "2020/04/19-17:21:48",
+            "name": "./example/CLAIM_STATUS.csv",
+            "end_epoch": 1587280910.6476126,
+            "end": "2020/04/19-17:21:50",
+            "elapse": 2.5397486686706543,
             "localFile": {
-                "size": 11, 
-                "created": "2016/09/17-09:52:46", 
-                "modified": "2016/09/17-14:34:55", 
+                "filename": "./example/CLAIM_STATUS.csv",
+                "size": 95,
                 "md5": {
-                    "start": "2016/09/18-13:08:29", 
-                    "elapse": 0.003999948501586914, 
-                    "end": "2016/09/18-13:08:29", 
-                    "s3md5": "b10a8db164e0754105b7a99be72e3fe5"
-                }, 
-                "filename": "c:\\temp\\1\\hello.txt"
-            }
-        }, 
-        {
-            "elapse": 2.692000150680542, 
-            "end": "2016/09/18-13:08:35", 
-            "name": "c:\\temp\\1\\world.txt", 
+                    "s3md5": "6751f56d89b0c3fe7923d9bb5af00853",
+                    "start": "2020/04/19-17:21:48",
+                    "end": "2020/04/19-17:21:48",
+                    "elapse": 7.224082946777344e-05
+                },
+                "modified": "2020/04/19-15:15:48",
+                "created": "2020/04/19-15:23:58"
+            },
             "remoteFile": {
-                "s3md5": "4c24aac86aa49adce486631bf365098f", 
-                "bucket": "mydatalake", 
-                "upload": {
-                    "elapse": 1.371999979019165, 
-                    "end": "2016/09/18-13:08:34", 
-                    "consistency_check_wait": 0, 
-                    "start_epoch": 1474168113.457, 
-                    "start": "2016/09/18-13:08:33", 
-                    "end_epoch": 1474168114.829, 
-                    "msg": "Passed all tests", 
-                    "consistency_check_retries": 0
-                }, 
-                "filename": "landing/landsat/world.txt__20160918_130833", 
+                "bucket": "jarrods-datalake",
+                "filename": "landing/CLAIM_STATUS.csv__20200419_172148",
+                "size": 95,
+                "last_modified": "2020/04/19-17:21:51",
+                "s3md5": "6751f56d89b0c3fe7923d9bb5af00853",
+                "last_modified_epoch": 1587280911.0,
                 "extra_args": {
+                    "ServerSideEncryption": "AES256",
                     "Metadata": {
-                        "local_file": "c:\\temp\\1\\world.txt", 
-                        "upload_batch": "1474168113.19"
-                    }, 
-                    "ServerSideEncryption": "AES256"
-                }, 
-                "last_modified": "2016/09/18-13:08:37", 
+                        "local_file": "./example/CLAIM_STATUS.csv",
+                        "upload_batch": "1587280908.107864"
+                    }
+                },
+                "upload": {
+                    "start": "2020/04/19-17:21:49",
+                    "end": "2020/04/19-17:21:50",
+                    "start_epoch": 1587280909.2390258,
+                    "end_epoch": 1587280910.409092,
+                    "elapse": 1.1700661182403564,
+                    "consistency_check_retries": 0,
+                    "consistency_check_wait": 0,
+                    "msg": "Passed all tests"
+                },
                 "before": {
-                    "last_modified_epoch": null, 
-                    "size": null, 
-                    "last_modified": null, 
-                    "exists": false, 
-                    "s3md5": null
-                }, 
-                "size": 13, 
-                "last_modified_epoch": 1474168117.0
-            }, 
-            "start_epoch": 1474168113.188, 
-            "start": "2016/09/18-13:08:33", 
-            "end_epoch": 1474168115.88, 
-            "localFile": {
-                "size": 13, 
-                "created": "2016/09/18-12:29:54", 
-                "modified": "2016/09/18-12:30:12", 
-                "md5": {
-                    "start": "2016/09/18-13:08:33", 
-                    "elapse": 0.004000186920166016, 
-                    "end": "2016/09/18-13:08:33", 
-                    "s3md5": "4c24aac86aa49adce486631bf365098f"
-                }, 
-                "filename": "c:\\temp\\1\\world.txt"
+                    "exists": false,
+                    "s3md5": null,
+                    "size": null,
+                    "last_modified_epoch": null,
+                    "last_modified": null
+                }
             }
         }
-    ], 
-    "elapse": 6.735000133514404, 
-    "end": "2016/09/18-13:08:35", 
-    "batch_counter": 2, 
-    "batch": "1474168109.14", 
-    "start_epoch": 1474168109.145, 
-    "batch_failed": 0, 
-    "start": "2016/09/18-13:08:29", 
-    "end_epoch": 1474168115.88, 
-    "batch_success": 2
+    ],
+    "batch_counter": 1,
+    "batch_success": 1,
+    "batch_failed": 0,
+    "end_epoch": 1587280910.6476202,
+    "end": "2020/04/19-17:21:50",
+    "elapse": 2.5397987365722656
 }
-
 ```

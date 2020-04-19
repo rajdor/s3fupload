@@ -1,0 +1,9 @@
+PARTY_ROLE_ID|CODE|DESCRIPTION
+1|PRM|Primary Policy Holder
+2|SPS|Spouse
+3|SON|Son
+4|DAU|Daughter
+5|PAR|Partner
+6|REL|Relative
+7|LAW|Lawyer
+8|GUA|Guardian

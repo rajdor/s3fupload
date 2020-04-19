@@ -1,0 +1,20 @@
+[
+ {
+   "bucket": "jarrods-datalake",
+   "remotePath": "landing/",
+   "remoteFileSuffix": "%%timestamp%%",
+   "localFile": "./example/PARTY.csv"
+ },
+ {
+   "bucket": "jarrods-datalake",
+   "remotePath": "landing/",
+   "remoteFileSuffix": "%%timestamp%%",
+   "localFile": "./example/PARTY_ROLE.csv"
+ },
+ {
+   "bucket": "jarrods-datalake",
+   "remotePath": "landing/",
+   "remoteFileSuffix": "%%timestamp%%",
+   "localFile": "./example/PORTFOLIO.csv"
+ }
+]

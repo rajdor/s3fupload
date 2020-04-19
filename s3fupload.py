@@ -7,6 +7,8 @@ import datetime
 import boto3
 import botocore
 import sys
+import logging
+import os
 from boto3.s3.transfer import S3Transfer
 
 class MyFile:
@@ -15,7 +17,6 @@ class MyFile:
     def __init__(self, localFile, bucket, path, suffix):
 
         if not os.path.isfile(localFile):
-            print "Specified file does not exists: " + localFile
             exit(1)
 
         self.start_epoch = time.time()
@@ -130,33 +131,23 @@ class MyFile:
         self.remoteFile['upload']['start'] = time.strftime("%Y/%m/%d-%H:%M:%S",
                                                            time.localtime(self.remoteFile['upload']['start_epoch']))
 
+        logger.debug("uploadFile : starting transfer : " + self.localFile['filename'])
         transfer.upload_file(self.localFile['filename'], self.remoteFile['bucket'], self.remoteFile['filename'],
                              extra_args=self.remoteFile['extra_args']
                              )
+        logger.debug("uploadFile : completed transfer : "  + self.localFile['filename'])
         self.remoteFile['upload']['end_epoch'] = time.time()
         self.remoteFile['upload']['end'] = time.strftime("%Y/%m/%d-%H:%M:%S",
                                                          time.localtime(self.remoteFile['upload']['end_epoch']))
         self.remoteFile['upload']['elapse'] = self.remoteFile['upload']['end_epoch'] - self.remoteFile['upload'][
             'start_epoch']
 
-    #  def setTag(self, k, v):
-    #      # apparently u can't set tags but instead need to copy the entire file...
-    #      https://github.com/boto/boto3/issues/389
-    #
-    #      k = "x-amz-meta-" + str(k)
-    #      v = str(v)
-    #      object  = MyFile.s3Resource.Object(self.remoteFile['bucket'],self.remoteFile['filename'])
-    #      object.put(Metadata={k: v})
-
     def getUploadSuccess(self, retries, retryTime):
-
-        # replace this with wait_until_exists??
-
+        logger.debug("Checking for upload success : "  + self.localFile['filename'] + " : " + str(retries))
         self.getRemoteFileProperties()
 
         self.remoteFile['upload']['consistency_check_retries'] = retries
-        self.remoteFile['upload']['consistency_check_wait'] = self.remoteFile['upload'][
-                                                                  'consistency_check_wait'] + retryTime
+        self.remoteFile['upload']['consistency_check_wait'] = self.remoteFile['upload']['consistency_check_wait'] + retryTime
 
         if self.localFile['md5']['s3md5'] != self.remoteFile['s3md5']:
             self.remoteFile['upload']['msg'] = "MD5 check failed"
@@ -175,14 +166,49 @@ class MyFile:
             return False, self.remoteFile['upload']['msg']
 
         self.remoteFile['upload']['msg'] = "Passed all tests"
+        logger.debug("Checking for upload success : "  + self.localFile['filename'] + " : Passed all tests")
 
         self.end_epoch = time.time()
         self.end = time.strftime("%Y/%m/%d-%H:%M:%S", time.localtime(self.end_epoch))
         self.elapse = self.end_epoch - self.start_epoch
 
-        # self.setTag("Status","OK")
-
         return True, self.remoteFile['upload']['msg']
+
+
+def get_logger(logger_name,create_file=False):
+
+        class MyFormatter(logging.Formatter):
+            """ Custom logger format to get nice timestamp"""
+            converter = datetime.datetime.fromtimestamp
+            def formatTime(self, record, datefmt=None):
+                ct = self.converter(record.created)
+                if datefmt:
+                    s = ct.strftime(datefmt)
+                else:
+                    t = ct.strftime("%Y-%m-%d %H:%M:%S")
+                    s = "%s,%03d" % (t, record.msecs)
+                return s
+
+        log = logging.getLogger(logger_name)
+        log.setLevel(level=logging.INFO)
+
+        formatter = MyFormatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S.%f')
+
+        if create_file:
+                fn = os.path.splitext(os.path.basename(__file__))[0] + ".log"
+                fh = logging.FileHandler(fn)
+                fh.setLevel(level=logging.DEBUG)
+                fh.setFormatter(formatter)
+
+        ch = logging.StreamHandler()
+        ch.setLevel(level=logging.DEBUG)
+        ch.setFormatter(formatter)
+
+        if create_file:
+            log.addHandler(fh)
+
+        log.addHandler(ch)
+        return  log 
 
 
 def utcToBrisbane(dateString, date_format):
@@ -203,6 +229,9 @@ def utcToBrisbane(dateString, date_format):
 
     return date_object
 
+logger = get_logger("logger", False)
+
+
 
 def s3md5(fname):
     # generate the AWS S3 Etag value on given (local file)
@@ -218,22 +247,15 @@ def s3md5(fname):
     hashObject = hashlib.md5()
 
     if filesize > multipartThreshold:
-        partCount = 0
-        md5String = ""
-        with open(fname, "rb") as f:
-            for block in iter(lambda: f.read(uploadPartSize), ""):
-                hashObject = hashlib.md5()
-                hashObject.update(block)
-                md5String = md5String + binascii.unhexlify(hashObject.hexdigest())
-                partCount += 1
-
-                hashObject = hashlib.md5()
-                hashObject.update(md5String)
-        h = hashObject.hexdigest() + "-" + str(partCount)
+        md5s = []
+        with open(fname, 'rb') as f:
+           for block in iter(lambda: f.read(uploadPartSize), b''):
+               md5s.append(hashlib.md5(block).digest())
+        h = hashlib.md5(b''.join(md5s)).hexdigest() + '-' + str(len(md5s))
 
     else:
         with open(fname, "rb") as f:
-            for block in iter(lambda: f.read(uploadPartSize), ""):
+            for block in iter(lambda: f.read(uploadPartSize), b''):
                 hashObject.update(block)
         h = hashObject.hexdigest()
 
@@ -244,6 +266,7 @@ def s3md5(fname):
 
 def uploadFile(localFile, bucket, path, suffix):
     f1 = MyFile(localFile, bucket, path, suffix)
+    logger.debug("uploadFile: " + str(localFile) + " : " + bucket + " : " + path + " : " + suffix)
     f1.getlocalMD5()
     f1.getBeforeRemoteFileProperties()
 
@@ -263,18 +286,23 @@ def uploadFile(localFile, bucket, path, suffix):
 
 
 def main():
-    inputFile = sys.argv[1]
 
-    # to do put these into the input file as options
-    # date/time options for prefix & suffix
-    # extra args for s3 upload, tags, encryption etc...
-    # different remote filename
+    logger.debug("Boto3 requires credentials, this script assumes you are using the shared credentials file as documented here https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html")
+    try:
+        inputFile = sys.argv[1]
+    except UnboundLocalError:
+        logger.error("Missing parameter file")
+        exit(8)
+    except IndexError:
+        logger.error("Missing parameter file")
+        exit(8)
 
-    # read input file in json format, loop through and upload files!
+    logger.debug("Input file: " + inputFile)
+
     data = json.load(open(inputFile))
-    
+
     start_epoch = time.time()
-   
+
     batch = {}
     batch['batch']       = str(start_epoch)
     batch['start_epoch'] = start_epoch
@@ -283,9 +311,10 @@ def main():
     batch['batch_counter'] = 0
     batch['batch_success'] = 0
     batch['batch_failed'] = 0
-    
+
     for j in data:
-        batch['batch_counter'] += 1 
+        batch['batch_counter'] += 1
+        logger.debug("Transfers : " + str(batch['batch_counter']) +"/" + str(len(data)) )
         
         localFile = j["localFile"]
         bucket    = j["bucket"]
@@ -297,19 +326,17 @@ def main():
 
         temp = uploadFile(localFile, bucket, path, suffix)
         if temp['remoteFile']['upload']['msg'] == "Passed all tests":
-           batch['batch_success'] += 1    
+           batch['batch_success'] += 1
         else:
-           batch['batch_failed'] += 1    
-        
+           batch['batch_failed'] += 1
+
         batch['files'].append(temp)
 
     batch['end_epoch'] = time.time()
     batch['end']       = time.strftime("%Y/%m/%d-%H:%M:%S", time.localtime(batch['end_epoch']))
     batch['elapse']    = batch['end_epoch'] - batch['start_epoch']
-    
-    print json.dumps(batch, indent=4, sort_keys=False)
 
-        
+    print (json.dumps(batch, indent=4, sort_keys=False))
 
 if __name__ == "__main__":
     main()
