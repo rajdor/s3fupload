@@ -3,8 +3,17 @@
 s3fupload is for copying files from a local system to S3.
 It's aim is to provide robust acknowledgement of s3 copy confirmation and timing.
 
-Input is a JSON text file in the following form.  
-Currently, suffix is optional and only one option is available %%timestamp%%
+   * Input is a JSON text file in the following form  
+   * Currently, suffix is optional and only one option is available %%timestamp%%
+   * For each file in the JSON input file
+      * Get details of local file, including size, timestamp, md5 (AWS S3 E-Tag)
+      * Check to see if existing remote file exists
+	  * Transfer file 
+	  * Get details of remote file, including size, timestamp, md5 (AWS S3 E-Tag)
+	  * Compare results
+   * Output detailed results, time and other info as JSON to stdout
+
+---
 
 Example Command line:
 ```bash
@@ -14,7 +23,7 @@ python3 s3fupload.py ./example/single.json > ./example/single_example_outout.jso
 ```bash
 python3 s3fupload.py ./example/consignment.json > ./example/consignment_example_output.json
 ```
-
+---
 
 ## Example single file
 
