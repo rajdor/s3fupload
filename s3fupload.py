@@ -1,7 +1,6 @@
 import json
 import os
 import hashlib
-import binascii
 import time
 import datetime
 import boto3
@@ -14,10 +13,11 @@ from boto3.s3.transfer import S3Transfer
 class MyFile:
     s3Resource = boto3.resource('s3')
 
-    def __init__(self, localFile, bucket, path, suffix):
+    def __init__(self, localFile, bucket, path, suffix, tags):
 
         if not os.path.isfile(localFile):
-            exit(1)
+            logger.error("Localfile is not a file or does not exist : " + str(localFile))
+            exit(8)
 
         self.start_epoch = time.time()
         self.start = time.strftime("%Y/%m/%d-%H:%M:%S", time.localtime(self.start_epoch))
@@ -44,10 +44,14 @@ class MyFile:
         self.localFile['md5']['start'] = ""
         self.localFile['md5']['end'] = ""
         self.localFile['md5']['elapse'] = ""
-        self.localFile['modified'] = time.strftime("%Y/%m/%d-%H:%M:%S",
-                                                   time.localtime(os.path.getmtime(self.localFile['filename'])))
-        self.localFile['created'] = time.strftime("%Y/%m/%d-%H:%M:%S",
-                                                  time.localtime(os.path.getctime(self.localFile['filename'])))
+        self.localFile['modified'] = time.strftime("%Y/%m/%d-%H:%M:%S", time.localtime(os.path.getmtime(self.localFile['filename'])))
+        self.localFile['created'] = time.strftime("%Y/%m/%d-%H:%M:%S", time.localtime(os.path.getctime(self.localFile['filename'])))
+
+        try:
+             MyFile.s3Resource.meta.client.head_bucket(Bucket=bucket)
+        except botocore.client.ClientError:
+             logger.error("The bucket does not exist or you have no access. : " + str(bucket))
+             exit(8)
 
         self.remoteFile = {}
         self.remoteFile['bucket'] = bucket
@@ -57,12 +61,15 @@ class MyFile:
         self.remoteFile['s3md5'] = None
         self.remoteFile['last_modified_epoch'] = None
         self.remoteFile['last_modified'] = None
+        self.remoteFile['tags'] = tags
 
         self.remoteFile['extra_args'] = {}
         self.remoteFile['extra_args']['ServerSideEncryption'] = "AES256"
         self.remoteFile['extra_args']['Metadata'] = {}
         self.remoteFile['extra_args']['Metadata']['local_file'] = localFile
         self.remoteFile['extra_args']['Metadata']['upload_batch'] = str(self.start_epoch)
+
+        self.remoteFile['Tagging'] = tags
 
         self.remoteFile['upload'] = {}
         self.remoteFile['upload']['start'] = None
@@ -89,8 +96,7 @@ class MyFile:
         (self.localFile['md5']['s3md5'], self.localFile['md5']['start'], self.localFile['md5']['end'],
          self.localFile['md5']['elapse']) \
             = s3md5(self.localFile['filename'])
-        self.localFile['md5']['start'] = time.strftime("%Y/%m/%d-%H:%M:%S",
-                                                       time.localtime(self.localFile['md5']['start']))
+        self.localFile['md5']['start'] = time.strftime("%Y/%m/%d-%H:%M:%S", time.localtime(self.localFile['md5']['start']))
         self.localFile['md5']['end'] = time.strftime("%Y/%m/%d-%H:%M:%S", time.localtime(self.localFile['md5']['end']))
         return self.localFile['md5']['s3md5']
 
@@ -101,10 +107,11 @@ class MyFile:
             self.remoteFile['before']['s3md5'] = objectSummary.e_tag
             self.remoteFile['before']['s3md5'] = self.remoteFile['before']['s3md5'].replace("\"", "")
             self.remoteFile['before']['size'] = objectSummary.size
-            btimeStr = str(utcToBrisbane(objectSummary.last_modified, '%Y-%m-%d %H:%M:%S'))
-            self.remoteFile['before']['last_modified_epoch'] = time.mktime(time.strptime(btimeStr, '%Y-%m-%d %H:%M:%S'))
-            self.remoteFile['before']['last_modified'] = time.strftime("%Y/%m/%d-%H:%M:%S", time.localtime(
-                self.remoteFile['before']['last_modified_epoch']))
+
+            last_modified = utcToLocal(objectSummary.last_modified)
+            self.remoteFile['before']['last_modified_epoch'] = time.mktime(time.strptime(last_modified, '%Y-%m-%d %H:%M:%S'))
+            self.remoteFile['before']['last_modified'] = time.strftime("%Y/%m/%d-%H:%M:%S", time.localtime(self.remoteFile['before']['last_modified_epoch']))
+            
         except botocore.exceptions.ClientError as e:
             if e.response['Error']['Code'] == "404":
                 self.remoteFile['before']['exists'] = False
@@ -117,10 +124,12 @@ class MyFile:
             self.remoteFile['s3md5'] = objectSummary.e_tag
             self.remoteFile['s3md5'] = self.remoteFile['s3md5'].replace("\"", "")
             self.remoteFile['size'] = objectSummary.size
-            btimeStr = str(utcToBrisbane(objectSummary.last_modified, '%Y-%m-%d %H:%M:%S'))
-            self.remoteFile['last_modified_epoch'] = time.mktime(time.strptime(btimeStr, '%Y-%m-%d %H:%M:%S'))
-            self.remoteFile['last_modified'] = time.strftime("%Y/%m/%d-%H:%M:%S",
-                                                             time.localtime(self.remoteFile['last_modified_epoch']))
+            
+
+            last_modified = utcToLocal(objectSummary.last_modified)
+            self.remoteFile['last_modified_epoch'] = time.mktime(time.strptime(last_modified, '%Y-%m-%d %H:%M:%S'))
+            self.remoteFile['last_modified'] = time.strftime("%Y/%m/%d-%H:%M:%S", time.localtime(self.remoteFile['last_modified_epoch']))
+            
         except:
             raise
 
@@ -128,19 +137,25 @@ class MyFile:
         s3 = boto3.client('s3')
         transfer = S3Transfer(s3)
         self.remoteFile['upload']['start_epoch'] = time.time()
-        self.remoteFile['upload']['start'] = time.strftime("%Y/%m/%d-%H:%M:%S",
-                                                           time.localtime(self.remoteFile['upload']['start_epoch']))
+        self.remoteFile['upload']['start'] = time.strftime("%Y/%m/%d-%H:%M:%S", time.localtime(self.remoteFile['upload']['start_epoch']))
 
         logger.debug("uploadFile : starting transfer : " + self.localFile['filename'])
-        transfer.upload_file(self.localFile['filename'], self.remoteFile['bucket'], self.remoteFile['filename'],
-                             extra_args=self.remoteFile['extra_args']
-                             )
+        transfer.upload_file(self.localFile['filename'], self.remoteFile['bucket'], self.remoteFile['filename'], extra_args=self.remoteFile['extra_args'] )
         logger.debug("uploadFile : completed transfer : "  + self.localFile['filename'])
+        logger.debug("adding tags : completed transfer : "  + self.localFile['filename'])
+
+        if len(self.remoteFile['Tagging']) > 0:
+            try:
+                response = s3.put_object_tagging(
+                                 Bucket=self.remoteFile['bucket'],
+                                 Key=self.remoteFile['filename'],
+                                 Tagging={ 'TagSet': self.remoteFile['Tagging'] })
+            except:
+                raise
+
         self.remoteFile['upload']['end_epoch'] = time.time()
-        self.remoteFile['upload']['end'] = time.strftime("%Y/%m/%d-%H:%M:%S",
-                                                         time.localtime(self.remoteFile['upload']['end_epoch']))
-        self.remoteFile['upload']['elapse'] = self.remoteFile['upload']['end_epoch'] - self.remoteFile['upload'][
-            'start_epoch']
+        self.remoteFile['upload']['end'] = time.strftime("%Y/%m/%d-%H:%M:%S", time.localtime(self.remoteFile['upload']['end_epoch']))
+        self.remoteFile['upload']['elapse'] = self.remoteFile['upload']['end_epoch'] - self.remoteFile['upload']['start_epoch']
 
     def getUploadSuccess(self, retries, retryTime):
         logger.debug("Checking for upload success : "  + self.localFile['filename'] + " : " + str(retries))
@@ -157,12 +172,11 @@ class MyFile:
             self.remoteFile['upload']['msg'] = "File size check failed"
             return False, self.remoteFile['upload']['msg']
 
-        if not (self.remoteFile['upload']['start_epoch'] < self.remoteFile['last_modified_epoch'] <
-                        self.remoteFile['upload']['start_epoch'] + 10):
-            self.remoteFile['upload']['msg'] = "Remote timestamp hasn't been updated : " + str(
-                self.remoteFile['last_modified']) \
-                                               + " : Upload Started:" + str(self.remoteFile['upload']['start_epoch']) \
-                                               + " : Upload Ended:" + str(self.remoteFile['upload']['end_epoch'])
+        if not (self.remoteFile['upload']['start_epoch'] < self.remoteFile['last_modified_epoch'] < self.remoteFile['upload']['end_epoch']):
+            self.remoteFile['upload']['msg'] = "Remote timestamp can't be before start of upload or after end of upload: " \
+                                               + " : Last modified:"  + str(self.remoteFile['last_modified_epoch'])        \
+                                               + " : Upload Started:" + str(self.remoteFile['upload']['start_epoch'])      \
+                                               + " : Upload Ended:"   + str(self.remoteFile['upload']['end_epoch'])
             return False, self.remoteFile['upload']['msg']
 
         self.remoteFile['upload']['msg'] = "Passed all tests"
@@ -210,35 +224,25 @@ def get_logger(logger_name,create_file=False):
         log.addHandler(ch)
         return  log 
 
-
-def utcToBrisbane(dateString, date_format):
-    # OMG date handling....
-
-    dt_withouttz = str(dateString)[:-6]
-    date_object = datetime.datetime.strptime(dt_withouttz, date_format)
-
-    mytz_Brisbane = '+10:00'
-    mytz_modifier = mytz_Brisbane[0:1]
-    mytz_hours = mytz_Brisbane[1:3]
-    mytz_minutes = mytz_Brisbane[4:6]
-    mytz_seconds = int(mytz_minutes) * 60 + int(mytz_hours) * 3600
-    if mytz_modifier == '+':
-        date_object = date_object + datetime.timedelta(seconds=mytz_seconds)
-    if mytz_modifier == '-':
-        date_object = date_object - datetime.timedelta(seconds=mytz_seconds)
-
-    return date_object
+def utcToLocal(datestr):
+    datestr = str(datestr)
+    if str(datestr)[-6:] != "+00:00":
+        logger.error("Unexpected date format in utcToLocal : " + str(datestr))
+        exit(8)
+    # change this 2020-10-03 23:47:19+00:00
+    # into this 2020-10-03 23:47:19+0000
+    datestr = datestr.replace("+00:00","+0000")
+    UTC_datetime = datetime.datetime.strptime(datestr, '%Y-%m-%d %H:%M:%S%z')
+    UTC_datetime_timestamp = float(UTC_datetime.strftime("%s"))
+    local_datetime_converted = datetime.datetime.fromtimestamp(UTC_datetime_timestamp)
+    return (str(local_datetime_converted))
 
 logger = get_logger("logger", False)
 
-
-
 def s3md5(fname):
-    # generate the AWS S3 Etag value on given (local file)
-
+    #generate the AWS S3 Etag value on given (local file)
     # Max size in bytes before uploading in parts.
     multipartThreshold = 8 * 1024 * 1024
-
     # Size of parts when uploading in parts
     uploadPartSize = 8 * 1024 * 1024
 
@@ -264,8 +268,8 @@ def s3md5(fname):
     return h, start, end, elapse
 
 
-def uploadFile(localFile, bucket, path, suffix):
-    f1 = MyFile(localFile, bucket, path, suffix)
+def uploadFile(localFile, bucket, path, suffix, tags):
+    f1 = MyFile(localFile, bucket, path, suffix, tags)
     logger.debug("uploadFile: " + str(localFile) + " : " + bucket + " : " + path + " : " + suffix)
     f1.getlocalMD5()
     f1.getBeforeRemoteFileProperties()
@@ -281,13 +285,11 @@ def uploadFile(localFile, bucket, path, suffix):
         time.sleep(sleepAmt)
         success, msg = f1.getUploadSuccess(retries, sleepAmt)
         retries += 1
-        
     return f1.dumpVars()
 
 
 def main():
-
-    logger.debug("Boto3 requires credentials, this script assumes you are using the shared credentials file as documented here https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html")
+    logger.debug("Boto3 requires credentials, this script assumes you have a working '.aws' configuration. https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html")
     try:
         inputFile = sys.argv[1]
     except UnboundLocalError:
@@ -298,11 +300,9 @@ def main():
         exit(8)
 
     logger.debug("Input file: " + inputFile)
-
     data = json.load(open(inputFile))
 
     start_epoch = time.time()
-
     batch = {}
     batch['batch']       = str(start_epoch)
     batch['start_epoch'] = start_epoch
@@ -323,8 +323,13 @@ def main():
             suffix = j["remoteFileSuffix"]
         else:
             suffix = None
+        
+        if "tags" in j:
+            tags = j["tags"]
+        else:
+            tags = []
 
-        temp = uploadFile(localFile, bucket, path, suffix)
+        temp = uploadFile(localFile, bucket, path, suffix, tags)
         if temp['remoteFile']['upload']['msg'] == "Passed all tests":
            batch['batch_success'] += 1
         else:

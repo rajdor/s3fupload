@@ -1,47 +1,49 @@
 {
-    "batch": "1587280858.524325",
-    "start_epoch": 1587280858.524325,
-    "start": "2020/04/19-17:20:58",
+    "batch": "1601777521.0087087",
+    "start_epoch": 1601777521.0087087,
+    "start": "2020/10/04-13:12:01",
     "files": [
         {
-            "start_epoch": 1587280858.5243647,
-            "start": "2020/04/19-17:20:58",
-            "name": "./example/PARTY.csv",
-            "end_epoch": 1587280867.2539687,
-            "end": "2020/04/19-17:21:07",
-            "elapse": 8.729604005813599,
+            "start_epoch": 1601777521.009213,
+            "start": "2020/10/04-13:12:01",
+            "name": "./example/fileA10MB.txt",
+            "end_epoch": 1601777541.9716215,
+            "end": "2020/10/04-13:12:21",
+            "elapse": 20.962408542633057,
             "localFile": {
-                "filename": "./example/PARTY.csv",
-                "size": 855873,
+                "filename": "./example/fileA10MB.txt",
+                "size": 10485760,
                 "md5": {
-                    "s3md5": "9019888592efbf99cce8ecf76de40c18",
-                    "start": "2020/04/19-17:20:58",
-                    "end": "2020/04/19-17:20:58",
-                    "elapse": 0.0016574859619140625
+                    "s3md5": "e48f83e2887c41bb8eac8a23a2f3b14b-2",
+                    "start": "2020/10/04-13:12:02",
+                    "end": "2020/10/04-13:12:02",
+                    "elapse": 0.036212921142578125
                 },
-                "modified": "2020/04/19-15:15:48",
-                "created": "2020/04/19-15:23:58"
+                "modified": "2020/10/03-22:38:00",
+                "created": "2020/10/03-22:38:00"
             },
             "remoteFile": {
                 "bucket": "jarrods-datalake",
-                "filename": "landing/PARTY.csv__20200419_172058",
-                "size": 855873,
-                "last_modified": "2020/04/19-17:21:01",
-                "s3md5": "9019888592efbf99cce8ecf76de40c18",
-                "last_modified_epoch": 1587280861.0,
+                "filename": "landing/fileA10MB.txt__20201004_131201",
+                "size": 10485760,
+                "last_modified": "2020/10/04-13:12:05",
+                "s3md5": "e48f83e2887c41bb8eac8a23a2f3b14b-2",
+                "last_modified_epoch": 1601777525.0,
+                "tags": [],
                 "extra_args": {
                     "ServerSideEncryption": "AES256",
                     "Metadata": {
-                        "local_file": "./example/PARTY.csv",
-                        "upload_batch": "1587280858.5243647"
+                        "local_file": "./example/fileA10MB.txt",
+                        "upload_batch": "1601777521.009213"
                     }
                 },
+                "Tagging": [],
                 "upload": {
-                    "start": "2020/04/19-17:20:59",
-                    "end": "2020/04/19-17:21:05",
-                    "start_epoch": 1587280859.6109533,
-                    "end_epoch": 1587280865.6318529,
-                    "elapse": 6.020899534225464,
+                    "start": "2020/10/04-13:12:03",
+                    "end": "2020/10/04-13:12:20",
+                    "start_epoch": 1601777523.2015579,
+                    "end_epoch": 1601777540.8366792,
+                    "elapse": 17.63512134552002,
                     "consistency_check_retries": 0,
                     "consistency_check_wait": 0,
                     "msg": "Passed all tests"
@@ -56,44 +58,46 @@
             }
         },
         {
-            "start_epoch": 1587280867.2539926,
-            "start": "2020/04/19-17:21:07",
-            "name": "./example/PARTY_ROLE.csv",
-            "end_epoch": 1587280868.9188707,
-            "end": "2020/04/19-17:21:08",
-            "elapse": 1.6648781299591064,
+            "start_epoch": 1601777541.9721227,
+            "start": "2020/10/04-13:12:21",
+            "name": "./example/fileB10MB.txt",
+            "end_epoch": 1601777563.4847054,
+            "end": "2020/10/04-13:12:43",
+            "elapse": 21.512582778930664,
             "localFile": {
-                "filename": "./example/PARTY_ROLE.csv",
-                "size": 161,
+                "filename": "./example/fileB10MB.txt",
+                "size": 10485760,
                 "md5": {
-                    "s3md5": "1b0b0136427751809ce30d7967402c89",
-                    "start": "2020/04/19-17:21:07",
-                    "end": "2020/04/19-17:21:07",
-                    "elapse": 9.703636169433594e-05
+                    "s3md5": "52ebc5fa2bfd4161a90a33dcd0e70edf-2",
+                    "start": "2020/10/04-13:12:22",
+                    "end": "2020/10/04-13:12:22",
+                    "elapse": 0.03619027137756348
                 },
-                "modified": "2020/04/19-15:15:48",
-                "created": "2020/04/19-15:23:58"
+                "modified": "2020/10/03-22:38:23",
+                "created": "2020/10/03-22:38:23"
             },
             "remoteFile": {
                 "bucket": "jarrods-datalake",
-                "filename": "landing/PARTY_ROLE.csv__20200419_172107",
-                "size": 161,
-                "last_modified": "2020/04/19-17:21:09",
-                "s3md5": "1b0b0136427751809ce30d7967402c89",
-                "last_modified_epoch": 1587280869.0,
+                "filename": "landing/fileB10MB.txt__20201004_131221",
+                "size": 10485760,
+                "last_modified": "2020/10/04-13:12:25",
+                "s3md5": "52ebc5fa2bfd4161a90a33dcd0e70edf-2",
+                "last_modified_epoch": 1601777545.0,
+                "tags": [],
                 "extra_args": {
                     "ServerSideEncryption": "AES256",
                     "Metadata": {
-                        "local_file": "./example/PARTY_ROLE.csv",
-                        "upload_batch": "1587280867.2539926"
+                        "local_file": "./example/fileB10MB.txt",
+                        "upload_batch": "1601777541.9721227"
                     }
                 },
+                "Tagging": [],
                 "upload": {
-                    "start": "2020/04/19-17:21:07",
-                    "end": "2020/04/19-17:21:08",
-                    "start_epoch": 1587280867.495625,
-                    "end_epoch": 1587280868.6794863,
-                    "elapse": 1.183861255645752,
+                    "start": "2020/10/04-13:12:23",
+                    "end": "2020/10/04-13:12:42",
+                    "start_epoch": 1601777543.251269,
+                    "end_epoch": 1601777562.3890893,
+                    "elapse": 19.13782024383545,
                     "consistency_check_retries": 0,
                     "consistency_check_wait": 0,
                     "msg": "Passed all tests"
@@ -108,44 +112,46 @@
             }
         },
         {
-            "start_epoch": 1587280868.9189236,
-            "start": "2020/04/19-17:21:08",
-            "name": "./example/PORTFOLIO.csv",
-            "end_epoch": 1587280893.2967138,
-            "end": "2020/04/19-17:21:33",
-            "elapse": 24.377790212631226,
+            "start_epoch": 1601777563.4852974,
+            "start": "2020/10/04-13:12:43",
+            "name": "./example/fileC10MB.txt",
+            "end_epoch": 1601777580.2078629,
+            "end": "2020/10/04-13:13:00",
+            "elapse": 16.722565412521362,
             "localFile": {
-                "filename": "./example/PORTFOLIO.csv",
-                "size": 12776339,
+                "filename": "./example/fileC10MB.txt",
+                "size": 10485760,
                 "md5": {
-                    "s3md5": "7fb62bba2a073478c0fe1ffc57762553-2",
-                    "start": "2020/04/19-17:21:08",
-                    "end": "2020/04/19-17:21:08",
-                    "elapse": 0.026109695434570312
+                    "s3md5": "060d7724fb9960112a55e5e878c6eeea-2",
+                    "start": "2020/10/04-13:12:43",
+                    "end": "2020/10/04-13:12:43",
+                    "elapse": 0.035921335220336914
                 },
-                "modified": "2020/04/19-15:15:48",
-                "created": "2020/04/19-15:23:58"
+                "modified": "2020/10/03-22:38:46",
+                "created": "2020/10/03-22:38:46"
             },
             "remoteFile": {
                 "bucket": "jarrods-datalake",
-                "filename": "landing/PORTFOLIO.csv__20200419_172108",
-                "size": 12776339,
-                "last_modified": "2020/04/19-17:21:11",
-                "s3md5": "7fb62bba2a073478c0fe1ffc57762553-2",
-                "last_modified_epoch": 1587280871.0,
+                "filename": "landing/fileC10MB.txt__20201004_131243",
+                "size": 10485760,
+                "last_modified": "2020/10/04-13:12:46",
+                "s3md5": "060d7724fb9960112a55e5e878c6eeea-2",
+                "last_modified_epoch": 1601777566.0,
+                "tags": [],
                 "extra_args": {
                     "ServerSideEncryption": "AES256",
                     "Metadata": {
-                        "local_file": "./example/PORTFOLIO.csv",
-                        "upload_batch": "1587280868.9189236"
+                        "local_file": "./example/fileC10MB.txt",
+                        "upload_batch": "1601777563.4852974"
                     }
                 },
+                "Tagging": [],
                 "upload": {
-                    "start": "2020/04/19-17:21:09",
-                    "end": "2020/04/19-17:21:32",
-                    "start_epoch": 1587280869.188496,
-                    "end_epoch": 1587280892.1932042,
-                    "elapse": 23.00470805168152,
+                    "start": "2020/10/04-13:12:44",
+                    "end": "2020/10/04-13:12:59",
+                    "start_epoch": 1601777564.7319434,
+                    "end_epoch": 1601777579.1231375,
+                    "elapse": 14.391194105148315,
                     "consistency_check_retries": 0,
                     "consistency_check_wait": 0,
                     "msg": "Passed all tests"
@@ -163,7 +169,7 @@
     "batch_counter": 3,
     "batch_success": 3,
     "batch_failed": 0,
-    "end_epoch": 1587280893.2967217,
-    "end": "2020/04/19-17:21:33",
-    "elapse": 34.77239680290222
+    "end_epoch": 1601777580.2078714,
+    "end": "2020/10/04-13:13:00",
+    "elapse": 59.19916272163391
 }

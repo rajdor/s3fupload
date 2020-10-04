@@ -8,10 +8,15 @@ It's aim is to provide robust acknowledgement of s3 copy confirmation and timing
    * For each file in the JSON input file
       * Get details of local file, including size, timestamp, md5 (AWS S3 E-Tag)
       * Check to see if existing remote file exists
-	  * Transfer file 
-	  * Get details of remote file, including size, timestamp, md5 (AWS S3 E-Tag)
-	  * Compare results
+      * Transfer file 
+      * Get details of remote file, including size, timestamp, md5 (AWS S3 E-Tag)
+      * Compare results
    * Output detailed results, time and other info as JSON to stdout
+
+## 2020.10.04
+   * fixed local vs utc time comparisons
+   * added in S3 object tagging
+   * removed test csv files and replaced with genfiles.sh to make test files
 
 ---
 
@@ -33,7 +38,11 @@ python3 s3fupload.py ./example/consignment.json > ./example/consignment_example_
    "bucket": "jarrods-datalake",
    "remotePath": "landing/",
    "remoteFileSuffix": "%%timestamp%%",
-   "localFile": "./example/CLAIM_STATUS.csv"
+   "localFile": "./example/file1MB.txt",
+   "tags": [
+             {"Key": "key1", "Value": "value1"}
+           , {"Key": "key2", "Value": "value2"}
+           ]
  }
 ]
 ```
@@ -42,49 +51,69 @@ python3 s3fupload.py ./example/consignment.json > ./example/consignment_example_
 Example output:
 ```json
 {
-    "batch": "1587280908.1078215",
-    "start_epoch": 1587280908.1078215,
-    "start": "2020/04/19-17:21:48",
+    "batch": "1601777419.0340686",
+    "start_epoch": 1601777419.0340686,
+    "start": "2020/10/04-13:10:19",
     "files": [
         {
-            "start_epoch": 1587280908.107864,
-            "start": "2020/04/19-17:21:48",
-            "name": "./example/CLAIM_STATUS.csv",
-            "end_epoch": 1587280910.6476126,
-            "end": "2020/04/19-17:21:50",
-            "elapse": 2.5397486686706543,
+            "start_epoch": 1601777419.0345123,
+            "start": "2020/10/04-13:10:19",
+            "name": "./example/file1MB.txt",
+            "end_epoch": 1601777426.2732933,
+            "end": "2020/10/04-13:10:26",
+            "elapse": 7.238780975341797,
             "localFile": {
-                "filename": "./example/CLAIM_STATUS.csv",
-                "size": 95,
+                "filename": "./example/file1MB.txt",
+                "size": 1048576,
                 "md5": {
-                    "s3md5": "6751f56d89b0c3fe7923d9bb5af00853",
-                    "start": "2020/04/19-17:21:48",
-                    "end": "2020/04/19-17:21:48",
-                    "elapse": 7.224082946777344e-05
+                    "s3md5": "415cb81369af0529313fa007b1a0d399",
+                    "start": "2020/10/04-13:10:20",
+                    "end": "2020/10/04-13:10:20",
+                    "elapse": 0.013341903686523438
                 },
-                "modified": "2020/04/19-15:15:48",
-                "created": "2020/04/19-15:23:58"
+                "modified": "2020/10/03-22:37:09",
+                "created": "2020/10/03-22:37:09"
             },
             "remoteFile": {
                 "bucket": "jarrods-datalake",
-                "filename": "landing/CLAIM_STATUS.csv__20200419_172148",
-                "size": 95,
-                "last_modified": "2020/04/19-17:21:51",
-                "s3md5": "6751f56d89b0c3fe7923d9bb5af00853",
-                "last_modified_epoch": 1587280911.0,
+                "filename": "landing/file1MB.txt__20201004_131019",
+                "size": 1048576,
+                "last_modified": "2020/10/04-13:10:23",
+                "s3md5": "415cb81369af0529313fa007b1a0d399",
+                "last_modified_epoch": 1601777423.0,
+                "tags": [
+                    {
+                        "Key": "key1",
+                        "Value": "value1"
+                    },
+                    {
+                        "Key": "key2",
+                        "Value": "value2"
+                    }
+                ],
                 "extra_args": {
                     "ServerSideEncryption": "AES256",
                     "Metadata": {
-                        "local_file": "./example/CLAIM_STATUS.csv",
-                        "upload_batch": "1587280908.107864"
+                        "local_file": "./example/file1MB.txt",
+                        "upload_batch": "1601777419.0345123"
                     }
                 },
+                "Tagging": [
+                    {
+                        "Key": "key1",
+                        "Value": "value1"
+                    },
+                    {
+                        "Key": "key2",
+                        "Value": "value2"
+                    }
+                ],
                 "upload": {
-                    "start": "2020/04/19-17:21:49",
-                    "end": "2020/04/19-17:21:50",
-                    "start_epoch": 1587280909.2390258,
-                    "end_epoch": 1587280910.409092,
-                    "elapse": 1.1700661182403564,
+                    "start": "2020/10/04-13:10:21",
+                    "end": "2020/10/04-13:10:25",
+                    "start_epoch": 1601777421.1702878,
+                    "end_epoch": 1601777425.1662388,
+                    "elapse": 3.995950937271118,
                     "consistency_check_retries": 0,
                     "consistency_check_wait": 0,
                     "msg": "Passed all tests"
@@ -102,8 +131,9 @@ Example output:
     "batch_counter": 1,
     "batch_success": 1,
     "batch_failed": 0,
-    "end_epoch": 1587280910.6476202,
-    "end": "2020/04/19-17:21:50",
-    "elapse": 2.5397987365722656
+    "end_epoch": 1601777426.273302,
+    "end": "2020/10/04-13:10:26",
+    "elapse": 7.239233493804932
 }
+
 ```

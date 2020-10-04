@@ -1,0 +1,8 @@
+[
+ {
+   "bucket": "jarrods-datalake",
+   "remotePath": "landing/",
+   "remoteFileSuffix": "%%timestamp%%",
+   "localFile": "./example/file10GB.txt"
+ }
+]

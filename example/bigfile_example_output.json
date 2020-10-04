@@ -1,0 +1,67 @@
+{
+    "batch": "1601777736.2566533",
+    "start_epoch": 1601777736.2566533,
+    "start": "2020/10/04-13:15:36",
+    "files": [
+        {
+            "start_epoch": 1601777736.257092,
+            "start": "2020/10/04-13:15:36",
+            "name": "./example/file10GB.txt",
+            "end_epoch": 1601781416.2927551,
+            "end": "2020/10/04-14:16:56",
+            "elapse": 3680.035663127899,
+            "localFile": {
+                "filename": "./example/file10GB.txt",
+                "size": 10737418240,
+                "md5": {
+                    "s3md5": "3cc866b2a4e5b3e843b702bfd418d1e0-1280",
+                    "start": "2020/10/04-13:15:37",
+                    "end": "2020/10/04-13:16:02",
+                    "elapse": 24.81734299659729
+                },
+                "modified": "2020/10/04-06:17:58",
+                "created": "2020/10/04-06:17:58"
+            },
+            "remoteFile": {
+                "bucket": "jarrods-datalake",
+                "filename": "landing/file10GB.txt__20201004_131536",
+                "size": 10737418240,
+                "last_modified": "2020/10/04-13:16:05",
+                "s3md5": "3cc866b2a4e5b3e843b702bfd418d1e0-1280",
+                "last_modified_epoch": 1601777765.0,
+                "tags": [],
+                "extra_args": {
+                    "ServerSideEncryption": "AES256",
+                    "Metadata": {
+                        "local_file": "./example/file10GB.txt",
+                        "upload_batch": "1601777736.257092"
+                    }
+                },
+                "Tagging": [],
+                "upload": {
+                    "start": "2020/10/04-13:16:03",
+                    "end": "2020/10/04-14:16:55",
+                    "start_epoch": 1601777763.3258095,
+                    "end_epoch": 1601781415.330042,
+                    "elapse": 3652.004232406616,
+                    "consistency_check_retries": 0,
+                    "consistency_check_wait": 0,
+                    "msg": "Passed all tests"
+                },
+                "before": {
+                    "exists": false,
+                    "s3md5": null,
+                    "size": null,
+                    "last_modified_epoch": null,
+                    "last_modified": null
+                }
+            }
+        }
+    ],
+    "batch_counter": 1,
+    "batch_success": 1,
+    "batch_failed": 0,
+    "end_epoch": 1601781416.2927647,
+    "end": "2020/10/04-14:16:56",
+    "elapse": 3680.036111354828
+}

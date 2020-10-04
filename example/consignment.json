@@ -3,18 +3,18 @@
    "bucket": "jarrods-datalake",
    "remotePath": "landing/",
    "remoteFileSuffix": "%%timestamp%%",
-   "localFile": "./example/PARTY.csv"
+   "localFile": "./example/fileA10MB.txt"
  },
  {
    "bucket": "jarrods-datalake",
    "remotePath": "landing/",
    "remoteFileSuffix": "%%timestamp%%",
-   "localFile": "./example/PARTY_ROLE.csv"
+   "localFile": "./example/fileB10MB.txt"
  },
  {
    "bucket": "jarrods-datalake",
    "remotePath": "landing/",
    "remoteFileSuffix": "%%timestamp%%",
-   "localFile": "./example/PORTFOLIO.csv"
+   "localFile": "./example/fileC10MB.txt"
  }
 ]

@@ -3,6 +3,10 @@
    "bucket": "jarrods-datalake",
    "remotePath": "landing/",
    "remoteFileSuffix": "%%timestamp%%",
-   "localFile": "./example/CLAIM_STATUS.csv"
+   "localFile": "./example/file1MB.txt",
+   "tags": [
+             {"Key": "key1", "Value": "value1"}
+           , {"Key": "key2", "Value": "value2"}
+           ]
  }
 ]
